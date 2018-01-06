@@ -5,7 +5,7 @@ import imutils
 import cv2
 
 # Загружаю изображение сразу в ч/б, размываю, чтобы убрать шум
-im = cv2.imread('examples/crosses2.jpg', 0)
+im = cv2.imread('examples/crosses14.jpg', 0)
 im = cv2.GaussianBlur(im, (5, 5), 0)
 
 # Делаю бинарным и нахожу границы
@@ -48,8 +48,16 @@ for i, c in enumerate(markCnts):
         mask = np.zeros(thresh3.shape, dtype="uint8")
         
         cv2.drawContours(mask, [c], -1, 255, -1)
+
+        cv2.imshow('image', mask)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
         
         mask = cv2.bitwise_and(thresh3, thresh3, mask=mask)
+
+        cv2.imshow('image', mask)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
         
         total = cv2.countNonZero(mask)
 

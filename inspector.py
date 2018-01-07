@@ -5,9 +5,12 @@ import imutils
 import cv2
 
 # Загружаю изображение сразу в ч/б, размываю, чтобы убрать шум
-im = cv2.imread('examples/crosses6.jpg', 0)
-im = cv2.GaussianBlur(im, (5, 5), 0)
+im = cv2.imread('examples/blank7.jpg', 0)
+#im = cv2.GaussianBlur(im, (5, 5), 0)
 
+h, w = im.shape
+
+im = im[0:int(h*0.13), 0:w]
 # Делаю бинарным и нахожу границы
 ret, thresh = cv2.threshold(im, 127, 255, 0)
 im2, contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -24,6 +27,11 @@ im3 = four_point_transform(im, cont.reshape(4, 2))
 ret, thresh2 = cv2.threshold(im3, 127, 255, 0)
 im4, contours, hierarchy = cv2.findContours(thresh2, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
+
+im5 = thresh2.copy()
+cv2.drawContours(im5, contours, -1, 0, 1)
+
+cv2.imshow('image', im5)
 # Нахожу границы квадратиков по отношению сторон и их минимальному размеру
 markCnts = []
 for c in contours:
@@ -32,12 +40,12 @@ for c in contours:
 
         if w >= 20 and h >= 20 and ar >= 0.9 and ar <= 1.1:
                 markCnts.append(c)
+markCnts = cnts.sort_contours(markCnts, method = "left-to-right")[0]
 
 # Получаю более контрастное бинарное изображение 
 ret, thresh3 = cv2.threshold(im3, 0, 255, cv2.THRESH_OTSU)
 
 # Сортирую квадратики сверху вниз
-markCnts = cnts.sort_contours(markCnts, method = "top-to-bottom")[0]
 
 # Нахожу квадратик с крестиком по минимальному количеству
 # белых пикселей на изображении после наложения маски
@@ -62,5 +70,5 @@ for i, c in enumerate(markCnts):
         total = cv2.countNonZero(mask)
 
         if marked is None or total < marked[0]:
-               marked = (total, i)
+               marked = (total, i//2)
 print(marked)

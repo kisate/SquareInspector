@@ -66,4 +66,4 @@ def inspect (path) :
 
                 if marked is None or total < marked[0]:
                        marked = (total, i//2)
-        print(marked)
+        return marked[1]

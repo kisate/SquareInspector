@@ -35,7 +35,7 @@ for file in glob.glob("tocheck/*.jpg") :
         i=1
     else :
         i = 0
-        copyfile(file, 'sorted/{}/{}.jpg'.format(last, file[8:]))
+        copyfile(file, 'sorted/{}/{}'.format(last, file[8:]))
         
     j+=1
 ##s = "Scan_0023.jpg"

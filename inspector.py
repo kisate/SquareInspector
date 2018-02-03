@@ -4,6 +4,11 @@ import numpy as np
 import imutils
 import cv2
 
+class BigContourError(ValueError):
+        pass
+class MarkContoursError(ValueError):
+        pass
+
 def inspect (path) :
         
         im = cv2.imread(path, 0)
@@ -11,14 +16,16 @@ def inspect (path) :
         h, w = im.shape
 
         im = im[0:int(h*0.114), 0:w]
-        blurred = cv2.GaussianBlur(im, (5, 5), 0)
+        blurred = cv2.GaussianBlur(im, (3, 3), 0)
         edged = cv2.Canny(blurred, 75, 200)
        
         ret, thresh = cv2.threshold(edged, 200, 255, 0)
         im2, contours, hierarchy = cv2.findContours(edged, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
         #cv2.drawContours(im, contours, 215, 0, 3)
-        
+
+        #cv2.imshow('image', edged)
+        #cv2.waitKey(0)
 
         max_s = 0
         cont = contours[1]
@@ -32,14 +39,24 @@ def inspect (path) :
                                 cont = c
 
 
+##        temp = im.copy()
+##        cv2.drawContours(temp, [cont], -1, 0, 2)
+##        cv2.imshow('image', temp)
+##        cv2.waitKey(0)
+        
         peri = cv2.arcLength(cont, True)
         
-        approx = cv2.approxPolyDP(cont, 0.03 * peri, True)
+        approx = cv2.approxPolyDP(cont, 0.02 * peri, True)
         cont = approx
 
-        im3 = four_point_transform(im, cont.reshape(4, 2))
-
-        
+        temp = im.copy()
+##        cv2.drawContours(temp, [cont], -1, 0, 2)
+##        cv2.imshow('image', temp)
+##        cv2.waitKey(0)
+        try :
+                im3 = four_point_transform(im, cont.reshape(4, 2))
+        except ValueError:
+                raise BigContourError
         ret, thresh2 = cv2.threshold(im3, 0, 255, cv2.THRESH_OTSU)
         im4, contours, hierarchy = cv2.findContours(thresh2, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         
@@ -53,8 +70,15 @@ def inspect (path) :
                         markCnts.append(c)
         markCnts = cnts.sort_contours(markCnts, method = "left-to-right")[0]
 
+        temp = im3.copy()
+
+        cv2.drawContours(temp, markCnts, -1, 0, 2)
+        cv2.imshow('image', temp)
+        print(len(markCnts))
+        cv2.waitKey(0)
+                
         if len(markCnts) != 33 :
-                raise ValueError
+                raise MarkContoursError
         
 ##        for c in markCnts :
 ##                a = im4.copy()

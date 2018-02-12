@@ -9,6 +9,8 @@ class BigContourError(ValueError):
 class MarkContoursError(ValueError):
         pass
 
+DEBUG = False
+
 def inspect (path, contours) :
         
         im = cv2.imread(path, 0)
@@ -19,18 +21,25 @@ def inspect (path, contours) :
 
         markConts = contours['Mark Contours']
         
-        im3 = four_point_transform(im, cont.reshape(4, 2))
+        cropped = four_point_transform(im, cont.reshape(4, 2))
 
-        ret, thresh3 = cv2.threshold(im3, 0, 255, cv2.THRESH_OTSU)
+        ret, thresh = cv2.threshold(cropped, 0, 255, cv2.THRESH_OTSU)
 
+        if DEBUG :
+                im2 = cropped.copy()
+                cv2.drawContours(im2, markConts, -1, 0, 2)
+                cv2.imshow('image', im2)
+                cv2.waitKey(0)
+                cv2.destroyAllWindows()
+        
         marked = None
         for i, c in enumerate(markConts):
                 
-                mask = np.zeros(thresh3.shape, dtype="uint8")
+                mask = np.zeros(thresh.shape, dtype="uint8")
                 
                 cv2.drawContours(mask, [c], -1, 255, -1)
 
-                mask = cv2.bitwise_and(thresh3, thresh3, mask=mask)
+                mask = cv2.bitwise_and(thresh, thresh, mask=mask)
 
                 total = cv2.countNonZero(mask)
 
